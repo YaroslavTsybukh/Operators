@@ -1,4 +1,4 @@
-import { TextField, Container } from '@mui/material';
+import { TextField, Container, Typography } from '@mui/material';
 import { EnhancedTable } from '@/components/EnhancedTable';
 
 function App() {
@@ -6,16 +6,10 @@ function App() {
         <main>
             <section>
                 <Container maxWidth="xl">
-                    <h1>Operators</h1>
-                </Container>
-            </section>
-            <section>
-                <Container maxWidth="xl">
-                    <TextField id="outlined-helperText" label="Helper text" defaultValue="Ім’я користувача..." />
-                </Container>
-            </section>
-            <section>
-                <Container maxWidth="xl">
+                    <Typography component="h1" variant="h4">
+                        Оператори
+                    </Typography>
+                    <TextField id="outlined-helperText" label="Пошук" placeholder="Ім’я користувача..." sx={{ marginTop: '56px' }} />
                     <EnhancedTable />
                 </Container>
             </section>
