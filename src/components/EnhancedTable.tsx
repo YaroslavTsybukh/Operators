@@ -95,7 +95,17 @@ export const EnhancedTable = () => {
                                                 </Box>
                                             </TableCell>
                                             <TableCell>
-                                                <Checkbox checked={row.isWorking} disableRipple sx={{ pointerEvents: 'none' }} />
+                                                <Checkbox
+                                                    checked={row.isWorking}
+                                                    disableRipple
+                                                    sx={{
+                                                        pointerEvents: 'none',
+                                                        color: '#F04259',
+                                                        '&.Mui-checked': {
+                                                            color: '#F04259',
+                                                        },
+                                                    }}
+                                                />
                                             </TableCell>
                                             <TableCell>{row.createdAt}</TableCell>
                                             <TableCell>{row.com}</TableCell>
