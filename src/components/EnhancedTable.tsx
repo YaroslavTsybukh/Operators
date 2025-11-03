@@ -13,12 +13,15 @@ import type { IData, Order, IOperatorAddonNames } from '@/types';
 import { EnhancedTableHead } from '@/components';
 import { useQuery } from '@tanstack/react-query';
 import { operatorService } from '@/services/operator.service';
+import { useAppSelector } from '@/hooks';
 
 export const EnhancedTable = () => {
     const [order, setOrder] = React.useState<Order>('asc');
     const [orderBy, setOrderBy] = React.useState<keyof IData>('name');
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+    const search = useAppSelector((state) => state.filter.search);
 
     const { data } = useQuery({
         queryKey: ['tableData'],
@@ -71,12 +74,11 @@ export const EnhancedTable = () => {
         setPage(0);
     };
 
-    // Avoid a layout jump when reaching the last page with empty rows.
-    // const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    const filteredData = data.filter((value) => value.name.includes(search));
 
     const visibleRows = React.useMemo(
-        () => [...data].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-        [data, order, orderBy, page, rowsPerPage],
+        () => [...filteredData].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        [filteredData, order, orderBy, page, rowsPerPage],
     );
 
     return (
@@ -86,41 +88,40 @@ export const EnhancedTable = () => {
                     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
                         <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
                         <TableBody>
-                            {visibleRows.map((row, index) => {
-                                const labelId = `enhanced-table-checkbox-${index}`;
+                            {visibleRows.length > 0 ? (
+                                visibleRows.map((row, index) => {
+                                    const labelId = `enhanced-table-checkbox-${index}`;
 
-                                return (
-                                    <TableRow key={row.id} role="checkbox">
-                                        <TableCell>{row.id}</TableCell>
-                                        <TableCell component="th" id={labelId} scope="row">
-                                            {row.name}
-                                        </TableCell>
-                                        <TableCell>{`${row.isWorking}`}</TableCell>
-                                        <TableCell>{row.createdAt}</TableCell>
-                                        <TableCell>{row.com}</TableCell>
-                                        <TableCell>{row.agp}</TableCell>
-                                        <TableCell>{row.css}</TableCell>
-                                        <TableCell>{row.smtp}</TableCell>
-                                        <TableCell>{row.dram}</TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                            {/* {emptyRows > 0 && (
-                                <TableRow
-                                // style={{
-                                //     height: 53 * emptyRows,
-                                // }}
-                                >
-                                    <TableCell colSpan={6} />
+                                    return (
+                                        <TableRow key={row.id} role="checkbox">
+                                            <TableCell>{row.id}</TableCell>
+                                            <TableCell component="th" id={labelId} scope="row">
+                                                {row.name}
+                                            </TableCell>
+                                            <TableCell>{`${row.isWorking}`}</TableCell>
+                                            <TableCell>{row.createdAt}</TableCell>
+                                            <TableCell>{row.com}</TableCell>
+                                            <TableCell>{row.agp}</TableCell>
+                                            <TableCell>{row.css}</TableCell>
+                                            <TableCell>{row.smtp}</TableCell>
+                                            <TableCell>{row.dram}</TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={9} align="center">
+                                        No data available
+                                    </TableCell>
                                 </TableRow>
-                            )} */}
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     component="div"
-                    count={data.length}
+                    count={filteredData.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
