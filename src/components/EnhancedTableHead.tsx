@@ -1,43 +1,40 @@
-import type { FC } from 'react';
+import { type FC } from 'react';
 import { Box, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 
 import type { IData, IEnhancedTableProps, IHeadCell } from '@/types';
+import { operatorService } from '@/services/operator.service';
+import { useQuery } from '@tanstack/react-query';
 
-const headCells: readonly IHeadCell[] = [
+const fixedHeadCells: IHeadCell[] = [
     {
         id: 'name',
-        numeric: false,
-        disablePadding: true,
-        label: 'Dessert (100g serving)',
+        fieldName: 'Користувач',
     },
     {
-        id: 'calories',
-        numeric: true,
-        disablePadding: false,
-        label: 'Calories',
+        id: 'isWorking',
+        fieldName: 'Працює',
     },
     {
-        id: 'fat',
-        numeric: true,
-        disablePadding: false,
-        label: 'Fat (g)',
-    },
-    {
-        id: 'carbs',
-        numeric: true,
-        disablePadding: false,
-        label: 'Carbs (g)',
-    },
-    {
-        id: 'protein',
-        numeric: true,
-        disablePadding: false,
-        label: 'Protein (g)',
+        id: 'createdAt',
+        fieldName: 'Дата доєднання',
     },
 ];
 
 export const EnhancedTableHead: FC<IEnhancedTableProps> = ({ order, orderBy, onRequestSort }) => {
+    const { data } = useQuery({
+        queryKey: ['operatorAddon'],
+        queryFn: operatorService.getOperatorAddon,
+        select: (data) => {
+            const transformed = data.map((item) => ({
+                id: item.fieldName.toLowerCase() as keyof IData,
+                fieldName: item.fieldName,
+            }));
+
+            return [...fixedHeadCells, ...transformed];
+        },
+    });
+
     const createSortHandler = (property: keyof IData) => (event: React.MouseEvent<unknown>) => {
         onRequestSort(event, property);
     };
@@ -46,22 +43,23 @@ export const EnhancedTableHead: FC<IEnhancedTableProps> = ({ order, orderBy, onR
         <TableHead>
             <TableRow>
                 <TableCell>#</TableCell>
-                {headCells.map((headCell) => (
-                    <TableCell key={headCell.id} sortDirection={orderBy === headCell.id ? order : false}>
-                        <TableSortLabel
-                            active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
-                            onClick={createSortHandler(headCell.id)}
-                        >
-                            {headCell.label}
-                            {orderBy === headCell.id ? (
-                                <Box component="span" sx={visuallyHidden}>
-                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                                </Box>
-                            ) : null}
-                        </TableSortLabel>
-                    </TableCell>
-                ))}
+                {data &&
+                    data.map((headCell) => (
+                        <TableCell key={headCell.id} sortDirection={orderBy === headCell.id ? order : false}>
+                            <TableSortLabel
+                                active={orderBy === headCell.id}
+                                direction={orderBy === headCell.id ? order : 'asc'}
+                                onClick={createSortHandler(headCell.id)}
+                            >
+                                {headCell.fieldName}
+                                {orderBy === headCell.id ? (
+                                    <Box component="span" sx={visuallyHidden}>
+                                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                    </Box>
+                                ) : null}
+                            </TableSortLabel>
+                        </TableCell>
+                    ))}
             </TableRow>
         </TableHead>
     );

@@ -1,19 +1,18 @@
-export interface IData {
+import type { IOperatorAddonNames } from './operator.types';
+
+export interface IData extends IOperatorAddonNames {
     id: number;
-    calories: number;
-    carbs: number;
-    fat: number;
+    avatar: string;
     name: string;
-    protein: number;
+    isWorking: boolean;
+    createdAt: string;
 }
 
 export type Order = 'asc' | 'desc';
 
 export interface IHeadCell {
-    disablePadding: boolean;
     id: keyof IData;
-    label: string;
-    numeric: boolean;
+    fieldName: string;
 }
 
 export interface IEnhancedTableProps {

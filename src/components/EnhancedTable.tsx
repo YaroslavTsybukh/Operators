@@ -9,41 +9,52 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 import { getComparator } from '@/utils';
-import type { IData, Order } from '@/types';
+import type { IData, Order, IOperatorAddonNames } from '@/types';
 import { EnhancedTableHead } from '@/components';
-
-function createData(id: number, name: string, calories: number, fat: number, carbs: number, protein: number): IData {
-    return {
-        id,
-        name,
-        calories,
-        fat,
-        carbs,
-        protein,
-    };
-}
-
-const rows = [
-    createData(1, 'Cupcake', 305, 3.7, 67, 4.3),
-    createData(2, 'Donut', 452, 25.0, 51, 4.9),
-    createData(3, 'Eclair', 262, 16.0, 24, 6.0),
-    createData(4, 'Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData(5, 'Gingerbread', 356, 16.0, 49, 3.9),
-    createData(6, 'Honeycomb', 408, 3.2, 87, 6.5),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-    createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-    createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-    createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-    createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-];
+import { useQuery } from '@tanstack/react-query';
+import { operatorService } from '@/services/operator.service';
 
 export const EnhancedTable = () => {
     const [order, setOrder] = React.useState<Order>('asc');
-    const [orderBy, setOrderBy] = React.useState<keyof IData>('calories');
+    const [orderBy, setOrderBy] = React.useState<keyof IData>('name');
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+    const { data } = useQuery({
+        queryKey: ['tableData'],
+        queryFn: async () => {
+            const [operators, operatorAddons] = await Promise.all([operatorService.getOperators(), operatorService.getOperatorAddon()]);
+
+            return operators.map((operator) => {
+                const fixedValues = {
+                    id: operator.id,
+                    name: operator.name,
+                    avatar: operator.avatar,
+                    isWorking: operator.isWorking,
+                    createdAt: operator.createdAt,
+                };
+
+                const addonValues: IOperatorAddonNames = {
+                    com: '',
+                    agp: '',
+                    css: '',
+                    smtp: '',
+                    dram: '',
+                };
+
+                operatorAddons.forEach((operatorAddon) => {
+                    const key = operatorAddon.fieldName.toLowerCase() as keyof IOperatorAddonNames;
+
+                    if (key in addonValues) {
+                        addonValues[key] = operatorAddon.text;
+                    }
+                });
+
+                return { ...fixedValues, ...addonValues };
+            });
+        },
+        initialData: [],
+    });
 
     const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof IData) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -64,8 +75,8 @@ export const EnhancedTable = () => {
     // const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
     const visibleRows = React.useMemo(
-        () => [...rows].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-        [order, orderBy, page, rowsPerPage],
+        () => [...data].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        [data, order, orderBy, page, rowsPerPage],
     );
 
     return (
@@ -80,14 +91,17 @@ export const EnhancedTable = () => {
 
                                 return (
                                     <TableRow key={row.id} role="checkbox">
-                                        <TableCell>1</TableCell>
+                                        <TableCell>{row.id}</TableCell>
                                         <TableCell component="th" id={labelId} scope="row">
                                             {row.name}
                                         </TableCell>
-                                        <TableCell>{row.calories}</TableCell>
-                                        <TableCell>{row.fat}</TableCell>
-                                        <TableCell>{row.carbs}</TableCell>
-                                        <TableCell>{row.protein}</TableCell>
+                                        <TableCell>{`${row.isWorking}`}</TableCell>
+                                        <TableCell>{row.createdAt}</TableCell>
+                                        <TableCell>{row.com}</TableCell>
+                                        <TableCell>{row.agp}</TableCell>
+                                        <TableCell>{row.css}</TableCell>
+                                        <TableCell>{row.smtp}</TableCell>
+                                        <TableCell>{row.dram}</TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -104,9 +118,9 @@ export const EnhancedTable = () => {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
                     component="div"
-                    count={rows.length}
+                    count={data.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
