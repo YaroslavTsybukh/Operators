@@ -1,5 +1,17 @@
 import * as React from 'react';
-import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Paper, Checkbox } from '@mui/material';
+import {
+    Avatar,
+    CircularProgress,
+    Box,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TablePagination,
+    TableRow,
+    Paper,
+    Checkbox,
+} from '@mui/material';
 import dayjs from 'dayjs';
 
 import { getComparator } from '@/utils';
@@ -15,7 +27,7 @@ export const EnhancedTable = () => {
 
     const search = useAppSelector((state) => state.filter.search);
 
-    const { data } = useOperatorWithAddons();
+    const { data, isLoading } = useOperatorWithAddons();
 
     const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof IData) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -46,7 +58,13 @@ export const EnhancedTable = () => {
                     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
                         <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
                         <TableBody>
-                            {visibleRows.length > 0 ? (
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={9} align="center">
+                                        <CircularProgress />
+                                    </TableCell>
+                                </TableRow>
+                            ) : visibleRows.length > 0 ? (
                                 visibleRows.map((row, index) => {
                                     const labelId = `enhanced-table-checkbox-${index}`;
 

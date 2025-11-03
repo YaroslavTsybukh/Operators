@@ -4,7 +4,7 @@ import { operatorService } from '@/services/operator.service';
 import type { IData, IHeadCell } from '@/types';
 
 export const useOperatorAddonTableHead = (fixedHeadCells: IHeadCell[]) => {
-    const { data } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ['operator-addon'],
         queryFn: operatorService.getOperatorAddon,
         select: (data) => {
@@ -17,5 +17,5 @@ export const useOperatorAddonTableHead = (fixedHeadCells: IHeadCell[]) => {
         },
     });
 
-    return { data };
+    return { data, isLoading };
 };
