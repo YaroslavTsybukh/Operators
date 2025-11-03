@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Paper } from '@mui/material';
+import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Paper, Checkbox } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 
 import { getComparator } from '@/utils';
@@ -94,7 +94,9 @@ export const EnhancedTable = () => {
                                                     {row.name}
                                                 </Box>
                                             </TableCell>
-                                            <TableCell>{`${row.isWorking}`}</TableCell>
+                                            <TableCell>
+                                                <Checkbox checked={row.isWorking} disableRipple sx={{ pointerEvents: 'none' }} />
+                                            </TableCell>
                                             <TableCell>{row.createdAt}</TableCell>
                                             <TableCell>{row.com}</TableCell>
                                             <TableCell>{row.agp}</TableCell>
