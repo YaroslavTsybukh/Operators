@@ -1,17 +1,10 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Paper } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 
 import { getComparator } from '@/utils';
 import type { IData, Order, IOperatorAddonNames } from '@/types';
 import { EnhancedTableHead } from '@/components';
-import { useQuery } from '@tanstack/react-query';
 import { operatorService } from '@/services/operator.service';
 import { useAppSelector } from '@/hooks';
 
@@ -96,7 +89,10 @@ export const EnhancedTable = () => {
                                         <TableRow key={row.id} role="checkbox">
                                             <TableCell>{row.id}</TableCell>
                                             <TableCell component="th" id={labelId} scope="row">
-                                                {row.name}
+                                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                                    <Avatar src={row.avatar} alt="аватар" />
+                                                    {row.name}
+                                                </Box>
                                             </TableCell>
                                             <TableCell>{`${row.isWorking}`}</TableCell>
                                             <TableCell>{row.createdAt}</TableCell>
