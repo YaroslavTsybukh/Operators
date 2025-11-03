@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Paper, Checkbox } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 
 import { getComparator } from '@/utils';
 import type { IData, Order, IOperatorAddonNames } from '@/types';
@@ -107,7 +108,7 @@ export const EnhancedTable = () => {
                                                     }}
                                                 />
                                             </TableCell>
-                                            <TableCell>{row.createdAt}</TableCell>
+                                            <TableCell>{dayjs(row.createdAt).format('DD.MM.YYYY HH:mm')}</TableCell>
                                             <TableCell>{row.com}</TableCell>
                                             <TableCell>{row.agp}</TableCell>
                                             <TableCell>{row.css}</TableCell>
