@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow, Paper, Checkbox } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { getComparator } from '@/utils';
-import type { IData, Order, IOperatorAddonNames } from '@/types';
+import type { IData, Order } from '@/types';
 import { EnhancedTableHead } from '@/components';
-import { operatorService } from '@/services/operator.service';
-import { useAppSelector } from '@/hooks';
+import { useAppSelector, useOperatorWithAddons } from '@/hooks';
 
 export const EnhancedTable = () => {
     const [order, setOrder] = React.useState<Order>('asc');
@@ -17,41 +15,7 @@ export const EnhancedTable = () => {
 
     const search = useAppSelector((state) => state.filter.search);
 
-    const { data } = useQuery({
-        queryKey: ['tableData'],
-        queryFn: async () => {
-            const [operators, operatorAddons] = await Promise.all([operatorService.getOperators(), operatorService.getOperatorAddon()]);
-
-            return operators.map((operator) => {
-                const fixedValues = {
-                    id: operator.id,
-                    name: operator.name,
-                    avatar: operator.avatar,
-                    isWorking: operator.isWorking,
-                    createdAt: operator.createdAt,
-                };
-
-                const addonValues: IOperatorAddonNames = {
-                    com: '',
-                    agp: '',
-                    css: '',
-                    smtp: '',
-                    dram: '',
-                };
-
-                operatorAddons.forEach((operatorAddon) => {
-                    const key = operatorAddon.fieldName.toLowerCase() as keyof IOperatorAddonNames;
-
-                    if (key in addonValues) {
-                        addonValues[key] = operatorAddon.text;
-                    }
-                });
-
-                return { ...fixedValues, ...addonValues };
-            });
-        },
-        initialData: [],
-    });
+    const { data } = useOperatorWithAddons();
 
     const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof IData) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -68,7 +32,7 @@ export const EnhancedTable = () => {
         setPage(0);
     };
 
-    const filteredData = data.filter((value) => value.name.includes(search));
+    const filteredData = data.filter((value) => value.name.toLowerCase().includes(search.toLowerCase().trim()));
 
     const visibleRows = React.useMemo(
         () => [...filteredData].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
